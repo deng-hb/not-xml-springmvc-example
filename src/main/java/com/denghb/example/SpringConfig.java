@@ -7,8 +7,12 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
@@ -18,6 +22,8 @@ import javax.sql.DataSource;
  */
 @Configuration
 @ComponentScan(basePackages={"com.denghb.*.service"})
+@EnableTransactionManagement
+@PropertySource("classpath:db.properties")
 public class SpringConfig {
     @Value("${db.driver}")
     private String driver;
@@ -48,20 +54,15 @@ public class SpringConfig {
     }
 
     @Bean
-    public DbHelper dbHelper(){
+    public DbHelper dbHelper(JdbcTemplate jdbcTemplate){
         DbHelper db = new DbHelper();
-        db.setJdbcTemplate(jdbcTemplate());
+        db.setJdbcTemplate(jdbcTemplate);
         return db;
     }
 
-    /**
-     * 必须加上static
-     */
     @Bean
-    public static PropertyPlaceholderConfigurer loadProperties() {
-        PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
-        ClassPathResource resource = new ClassPathResource("db.properties");
-        configurer.setLocations(resource);
-        return configurer;
+    public PlatformTransactionManager txManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
     }
+
 }

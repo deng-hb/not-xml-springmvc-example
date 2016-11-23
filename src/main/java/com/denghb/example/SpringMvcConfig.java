@@ -22,4 +22,5 @@ public class SpringMvcConfig {
         viewResolver.setSuffix(".jsp");
         return viewResolver;
     }
+
 }
